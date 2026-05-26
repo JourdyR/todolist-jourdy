@@ -1,159 +1,493 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KOF TO-DO: ROUND 1!</title>
+    <title>TASKHUB: KOF VINTAGE ARCADE</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --kof-red: #e61e25;
+            --kof-gold: #ffbf00;
+            --kof-black: #050505;
+            --kof-card-bg: #111111;
+        }
+        
         body {
-            font-family: 'Press Start 2P', cursive;
-            background: #0a0a0a;
+            font-family: 'Teko', sans-serif;
+            background-color: var(--kof-black);
             color: #fff;
-            background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
-            background-size: cover;
-            background-attachment: fixed;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
         }
-        .kof-border {
-            border: 4px solid #ff4500;
-            box-shadow: 5px 5px 0px #8b0000;
+
+        /* Scanline Effect */
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
+            background-size: 100% 3px; pointer-events: none; z-index: 9999; opacity: 0.15;
         }
-        .kof-btn {
-            transition: all 0.2s;
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--kof-black); }
+        ::-webkit-scrollbar-thumb { background: var(--kof-red); border-radius: 0; }
+
+        .view-section {
+            display: none;
+            height: 100%;
+            overflow-y: auto;
+            padding-bottom: 50px;
+        }
+
+        .view-section.active {
+            display: block;
+            animation: arcadeFade 0.4s ease-out;
+        }
+
+        @keyframes arcadeFade {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .kof-title {
+            background: linear-gradient(to bottom, #fff 10%, var(--kof-gold) 50%, var(--kof-red) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            font-style: italic;
+            filter: drop-shadow(4px 4px 0px #000);
             text-transform: uppercase;
         }
-        .kof-btn:hover {
-            transform: scale(1.05);
-            background-color: #ff4500 !important;
+
+        /* Sidebar Merah-Emas-Hitam */
+        aside {
+            background-color: #0c0c0c;
+            border-right: 2px solid var(--kof-red);
+            box-shadow: 10px 0 20px rgba(230, 30, 37, 0.1);
         }
+
+        .sidebar-item {
+            cursor: pointer;
+            color: #777;
+            font-size: 1.7rem;
+            font-weight: 700;
+            font-style: italic;
+            text-transform: uppercase;
+            padding: 15px 30px;
+            transition: all 0.2s;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .sidebar-item:hover {
+            color: var(--kof-gold);
+            background: rgba(255, 191, 0, 0.05);
+        }
+
+        .sidebar-item.active {
+            color: #fff;
+            background: linear-gradient(90deg, var(--kof-red) 0%, transparent 100%);
+            border-left: 5px solid var(--kof-gold);
+        }
+
         .kof-card {
-            background: rgba(20, 20, 20, 0.9);
+            background: var(--kof-card-bg);
+            border: 1px solid #222;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kof-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, var(--kof-gold), var(--kof-red));
+        }
+
+        .kof-input {
+            background: #000;
+            border: 1px solid #333;
+            color: var(--kof-gold);
+            padding: 12px;
+            font-size: 1.4rem;
+            outline: none;
+        }
+
+        .kof-input:focus {
+            border-color: var(--kof-red);
+            box-shadow: 0 0 10px rgba(230, 30, 37, 0.3);
+        }
+
+        .btn-kof {
+            background: linear-gradient(to bottom, var(--kof-red), #8b0000);
+            color: white;
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            border: 1px solid var(--kof-gold);
+            box-shadow: 0 4px 0 #4a0000;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn-gold {
+            background: linear-gradient(to bottom, var(--kof-gold), #b8860b);
+            color: black;
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            border: 1px solid white;
+            box-shadow: 0 4px 0 #5c4305;
+            cursor: pointer;
+        }
+
+        .btn-kof:active, .btn-gold:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #000;
+        }
+
+        /* Modal Sesuai UI User (Putih Bersih) */
+        .modal-body {
+            background: #ffffff;
+            border-radius: 20px;
+            color: #222;
+            width: 95%;
+            max-width: 500px;
+            padding: 40px;
+            box-shadow: 0 0 50px rgba(230, 30, 37, 0.4);
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body>
+    <div class="scanlines"></div>
 
-    <div id="login-page" class="w-full max-auto max-w-md kof-card kof-border p-8 text-center">
-        <h1 class="text-2xl mb-8 text-yellow-500 italic">SELECT YOUR CHARACTER</h1>
-        <div class="space-y-4">
-            <input type="text" id="username" placeholder="USERNAME" class="w-full p-3 bg-black border-2 border-gray-700 focus:border-red-500 outline-none text-xs">
-            <input type="password" id="password" placeholder="PASSWORD" class="w-full p-3 bg-black border-2 border-gray-700 focus:border-red-500 outline-none text-xs">
-            <button onclick="handleLogin()" class="w-full bg-red-700 p-4 kof-btn text-sm">INSERT COIN (LOGIN)</button>
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="fixed inset-0 z-[2000] flex items-center justify-center bg-black">
+        <div class="text-center p-12 kof-card max-w-[420px] w-full mx-4 border-b-4 border-b-red-600">
+            <div class="font-['Press_Start_2P'] text-[12px] text-yellow-500 mb-10 tracking-widest animate-pulse">INSERT COIN</div>
+            <div class="space-y-6">
+                <input type="text" id="log-u" class="kof-input w-full text-center tracking-widest" placeholder="PLAYER ID">
+                <input type="password" id="log-p" class="kof-input w-full text-center tracking-widest" placeholder="PASSCODE">
+                <button onclick="login()" class="btn-kof w-full py-4 text-3xl mt-4">START BATTLE</button>
+            </div>
+            <p class="mt-10 text-zinc-800 font-bold uppercase text-[9px] tracking-[6px]">© 1994 SNK CORPORATION</p>
         </div>
-        <p id="login-error" class="text-red-500 text-[10px] mt-4 hidden">INVALID COMMAND! TRY AGAIN.</p>
     </div>
 
-    <div id="main-page" class="w-full max-w-4xl kof-card kof-border p-6 hidden">
-        <div class="flex justify-between items-center border-b-4 border-red-700 pb-4 mb-6">
-            <div>
-                <p class="text-[10px] text-gray-400">PLAYER 1:</p>
-                <h2 id="display-name" class="text-xl text-yellow-400">---</h2>
-            </div>
-            <button onclick="handleLogout()" class="bg-gray-800 px-4 py-2 text-[10px] kof-btn">LOGOUT</button>
-        </div>
-
-        <div id="admin-controls" class="hidden mb-8">
-            <h3 class="text-xs mb-4 text-blue-400">ADD NEW COMBO (TASK):</h3>
-            <div class="flex gap-2">
-                <input type="text" id="task-input" placeholder="What's the mission?" class="flex-1 p-3 bg-black border-2 border-gray-700 text-[10px] outline-none">
-                <button onclick="addTask()" class="bg-blue-700 px-6 kof-btn text-[10px]">ADD</button>
-            </div>
-        </div>
-
-        <div>
-            <h3 class="text-xs mb-4 text-red-500">MISSION LIST:</h3>
-            <div id="task-list" class="space-y-3">
+    <!-- MAIN APP SCREEN -->
+    <div id="app-screen" class="hidden w-full flex flex-col md:flex-row h-screen">
+        <!-- SIDEBAR (Fixed Arcade Style) -->
+        <aside class="w-full md:w-80 flex flex-col flex-shrink-0 z-50">
+            <div class="p-8">
+                <div class="flex items-center gap-3 mb-10">
+                    <div class="w-7 h-7 bg-red-600 flex items-center justify-center text-[12px] font-bold text-white border-2 border-yellow-500">K</div>
+                    <h1 class="text-4xl font-black italic tracking-tighter text-white uppercase">Task<span class="text-yellow-500">Hub</span></h1>
                 </div>
+
+                <div class="bg-zinc-900 p-5 border-l-4 border-l-yellow-500 mb-8">
+                    <p class="text-[10px] text-zinc-500 font-black uppercase mb-1 tracking-widest">SELECTED FIGHTER</p>
+                    <p id="p-name" class="text-2xl font-black text-white italic leading-none uppercase">---</p>
+                    <span id="p-badge" class="text-[9px] px-2 py-0.5 rounded-sm inline-block font-black mt-2 uppercase bg-red-600">USER</span>
+                </div>
+            </div>
+
+            <nav class="flex-grow">
+                <div onclick="nav('dash')" class="sidebar-item active" data-id="dash">DASHBOARD</div>
+                <div onclick="nav('tasks')" class="sidebar-item" data-id="tasks">MISSIONS LIST</div>
+                <div id="nav-add" onclick="nav('add')" class="sidebar-item hidden" data-id="add">DEPLOY MISSION</div>
+                <div onclick="nav('history')" class="sidebar-item" data-id="history">RECORDS</div>
+                <div onclick="nav('team')" class="sidebar-item" data-id="team">ROSTER</div>
+            </nav>
+
+            <div class="p-8 mt-auto">
+                <button onclick="location.reload()" class="w-full text-zinc-500 hover:text-red-500 border border-zinc-800 py-3 rounded font-black uppercase text-[10px] tracking-widest transition-all italic">
+                    [ GAME OVER / EXIT ]
+                </button>
+            </div>
+        </aside>
+
+        <!-- CONTENT (Scrollable Arcade Content) -->
+        <main class="flex-1 p-6 md:p-12 overflow-hidden bg-[#050505]">
+            
+            <!-- DASHBOARD -->
+            <section id="view-dash" class="view-section active">
+                <h2 class="text-8xl kof-title mb-12 italic">STATUS</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
+                    <div class="kof-card p-10 border-l-4 border-l-yellow-500">
+                        <p class="text-zinc-500 font-bold uppercase text-xs tracking-widest">ACTIVE MISSIONS</p>
+                        <p id="st-active" class="text-[10rem] font-black italic leading-none mt-4 text-white">0</p>
+                    </div>
+                    <div class="kof-card p-10 border-l-4 border-l-red-600">
+                        <p class="text-red-600 font-bold uppercase text-xs tracking-widest">CLEARED MISSIONS</p>
+                        <p id="st-done" class="text-[10rem] font-black italic text-red-600 leading-none mt-4">0</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DEPLOY MISI (ADMIN ONLY) -->
+            <section id="view-add" class="view-section">
+                <h2 class="text-7xl kof-title mb-10 italic">DEPLOY</h2>
+                <div class="kof-card p-10 max-w-3xl border-b-4 border-b-red-600">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-zinc-500 font-black uppercase text-[11px] mb-2 tracking-widest">Operation Title</label>
+                            <input type="text" id="m-title" class="kof-input w-full" placeholder="MASUKKAN JUDUL MISI">
+                        </div>
+                        <div>
+                            <label class="block text-zinc-500 font-black uppercase text-[11px] mb-2 tracking-widest">Objective Details</label>
+                            <textarea id="m-desc" class="kof-input w-full h-32 resize-none" placeholder="TULISKAN DESKRIPSI TUGAS DI SINI..."></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-8">
+                            <div>
+                                <label class="block text-zinc-500 font-black uppercase text-[11px] mb-2 tracking-widest">Deploy Date</label>
+                                <input type="date" id="m-start" class="kof-input w-full">
+                            </div>
+                            <div>
+                                <label class="block text-zinc-500 font-black uppercase text-[11px] mb-2 tracking-widest">Deadline Date</label>
+                                <input type="date" id="m-end" class="kof-input w-full">
+                            </div>
+                        </div>
+                        <button onclick="addTask()" class="btn-kof w-full py-5 text-4xl mt-6 tracking-tighter">CONFIRM MISSION</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MISSION LIST (Scrollable) -->
+            <section id="view-tasks" class="view-section">
+                <h2 class="text-7xl kof-title mb-12 italic">CURRENT MISSIONS</h2>
+                <div id="task-list" class="space-y-6"></div>
+            </section>
+
+            <!-- HISTORY -->
+            <section id="view-history" class="view-section">
+                <h2 class="text-7xl kof-title mb-12 italic">ARCHIVES</h2>
+                <div id="history-list" class="space-y-6"></div>
+            </section>
+
+            <!-- TEAM -->
+            <section id="view-team" class="view-section">
+                <h2 class="text-7xl kof-title mb-12 italic">ROSTER</h2>
+                <div class="kof-card overflow-hidden">
+                    <div class="bg-zinc-900/50 p-4 flex font-black text-[11px] uppercase text-zinc-500 border-b border-zinc-800">
+                        <div class="w-1/3">PLAYER_ID</div>
+                        <div class="w-2/3">NAME / RANK</div>
+                    </div>
+                    <div id="team-list" class="divide-y divide-zinc-900"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL PENYELESAIAN (USER ONLY) -->
+    <div id="sub-modal" class="fixed inset-0 z-[3000] bg-black/95 hidden items-center justify-center backdrop-blur-md p-4">
+        <div class="modal-body">
+            <div class="mb-8 flex justify-between items-center border-b border-zinc-100 pb-5">
+                <span class="bg-red-100 px-4 py-1 rounded-full font-black text-red-600 uppercase text-[10px] tracking-widest">MISSION CLEARANCE</span>
+                <span id="active-task-title" class="text-zinc-400 font-bold italic truncate ml-4"></span>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-[11px] font-black uppercase text-zinc-400 mb-2 tracking-widest">Media URL (Photo/Video/Doc)</label>
+                    <input type="url" id="sub-url" class="w-full border-b-2 border-zinc-200 p-4 text-zinc-800 outline-none text-xl font-bold focus:border-red-600 transition-all" placeholder="https://media-bukti.com/...">
+                    <p class="text-[9px] text-red-500 font-bold mt-2 uppercase tracking-tighter">*User must provide evidence URL to proceed.</p>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-black uppercase text-zinc-400 mb-2 tracking-widest">Final Report</label>
+                    <textarea id="sub-input" class="w-full h-32 border border-zinc-100 rounded-xl p-4 text-zinc-800 outline-none resize-none text-lg font-bold italic" placeholder="Jelaskan detail penyelesaian..."></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-6 items-center mt-12">
+                <button onclick="closeModal()" class="font-black text-zinc-400 uppercase tracking-widest text-sm italic">CANCEL</button>
+                <button onclick="confirmTask()" class="bg-red-600 text-white px-12 py-3 rounded-xl font-black text-xl italic shadow-xl shadow-red-200">CONFIRM CLEAR</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // Database Sederhana
-        const users = [
-            { username: "admin", pass: "123", name: "Jourdy Nichol", role: "admin" },
-            { username: "user1", pass: "12345", name: "User", role: "viewer" }
-        ];
+        const ROSTER = {
+            "admin": { pass: "123", name: "Jourdy Nichol", role: "ADMIN" },
+            "galih": { pass: "12345", name: "Galih", role: "USER" },
+            "abyan": { pass: "12345", name: "Abyan", role: "USER" }
+        };
 
-        let currentUser = null;
-        let tasks = JSON.parse(localStorage.getItem('kof_tasks')) || [
-            { id: 1, text: "Kalahkan Rugal Bernstein", status: "pending" }
-        ];
+        let user = null;
+        let activeTaskId = null;
+        let db = JSON.parse(localStorage.getItem('kof_taskhub_arcade_final')) || [];
 
-        // Login Logic
-        function handleLogin() {
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
-            const error = document.getElementById('login-error');
+        function login() {
+            const u = document.getElementById('log-u').value.toLowerCase().trim();
+            const p = document.getElementById('log-p').value;
 
-            const found = users.find(user => user.username === u && user.pass === p);
-
-            if (found) {
-                currentUser = found;
-                showDashboard();
-            } else {
-                error.classList.remove('hidden');
-            }
-        }
-
-        // Tampilan Dashboard
-        function showDashboard() {
-            document.getElementById('login-page').classList.add('hidden');
-            document.getElementById('main-page').classList.remove('hidden');
-            document.getElementById('display-name').innerText = currentUser.name;
-
-            if (currentUser.role === 'admin') {
-                document.getElementById('admin-controls').classList.remove('hidden');
-            }
-
-            renderTasks();
-        }
-
-        // Render Task ke Layar
-        function renderTasks() {
-            const list = document.getElementById('task-list');
-            list.innerHTML = '';
-
-            tasks.forEach((task, index) => {
-                const div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-gray-900 p-4 border-l-4 border-yellow-500";
+            if(ROSTER[u] && ROSTER[u].pass === p) {
+                user = { ...ROSTER[u], id: u };
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
                 
-                let actionBtn = '';
-                if (currentUser.role === 'admin') {
-                    actionBtn = `<button onclick="deleteTask(${index})" class="text-red-500 hover:text-white text-[10px]">[DELETE]</button>`;
-                }
+                document.getElementById('p-name').innerText = user.name;
+                const badge = document.getElementById('p-badge');
+                badge.innerText = user.role;
+                badge.className = `text-[9px] px-2 py-0.5 rounded-sm inline-block font-black mt-2 uppercase ${user.role === 'ADMIN' ? 'bg-yellow-500 text-black' : 'bg-red-600 text-white'}`;
 
-                div.innerHTML = `
-                    <span class="text-[10px]">${index + 1}. ${task.text}</span>
-                    ${actionBtn}
-                `;
-                list.appendChild(div);
-            });
+                if(user.role === 'ADMIN') document.getElementById('nav-add').classList.remove('hidden');
+                
+                render(); nav('dash');
+            } else {
+                alert("ACCESS DENIED: ID OR PASSCODE ERROR!");
+            }
         }
 
-        // Tambah Task (Admin Only)
+        function nav(id) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.getElementById('view-' + id).classList.add('active');
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            document.querySelector(`[data-id="${id}"]`).classList.add('active');
+        }
+
         function addTask() {
-            const input = document.getElementById('task-input');
-            if (input.value.trim() === '') return;
+            const title = document.getElementById('m-title').value;
+            const desc = document.getElementById('m-desc').value;
+            const start = document.getElementById('m-start').value;
+            const end = document.getElementById('m-end').value;
 
-            tasks.push({ id: Date.now(), text: input.value, status: "pending" });
-            saveAndRefresh();
-            input.value = '';
+            if(!title || !start || !end) return alert("MISSION ERROR: TITLE, START DATE, AND DEADLINE ARE REQUIRED!");
+
+            db.push({
+                id: Date.now(),
+                title: title,
+                desc: desc || "No description provided.",
+                start: start,
+                deadline: end,
+                status: 'ACTIVE',
+                author: user.name
+            });
+
+            localStorage.setItem('kof_taskhub_arcade_final', JSON.stringify(db));
+            render(); nav('tasks');
+            ['m-title', 'm-desc', 'm-start', 'm-end'].forEach(id => document.getElementById(id).value = '');
         }
 
-        // Hapus Task (Admin Only)
-        function deleteTask(index) {
-            tasks.splice(index, 1);
-            saveAndRefresh();
+        // FUNGSI UTAMA: ADMIN VERIFY vs USER SUBMIT
+        function processTask(id) {
+            const task = db.find(t => t.id === id);
+            
+            if(user.role === 'ADMIN') {
+                // ADMIN: Hanya klik verify langsung selesai
+                if(confirm(`DIRECT VERIFICATION: Mark "${task.title}" as CLEARED?`)) {
+                    updateStatus(id, 'DONE', { 
+                        url: 'N/A (Admin Verified)', 
+                        content: 'MISI TELAH DIVERIFIKASI LANGSUNG OLEH ADMIN JOURDY.', 
+                        time: new Date().toLocaleString(), 
+                        by: user.name 
+                    });
+                }
+            } else {
+                // USER: Wajib isi form
+                activeTaskId = id;
+                document.getElementById('active-task-title').innerText = task.title;
+                document.getElementById('sub-modal').style.display = 'flex';
+            }
         }
 
-        function saveAndRefresh() {
-            localStorage.setItem('kof_tasks', JSON.stringify(tasks));
-            renderTasks();
+        function confirmTask() {
+            const url = document.getElementById('sub-url').value.trim();
+            const content = document.getElementById('sub-input').value.trim();
+            
+            if(!url) return alert("SUBMISSION ERROR: PLEASE PROVIDE EVIDENCE URL (PHOTO/VIDEO)!");
+
+            updateStatus(activeTaskId, 'DONE', {
+                url: url,
+                content: content || 'Mission completed successfully.',
+                time: new Date().toLocaleString(),
+                by: user.name
+            });
+            closeModal();
         }
 
-        function handleLogout() {
-            location.reload(); // Gampangannya tinggal refresh buat logout
+        function updateStatus(id, status, evidence) {
+            const idx = db.findIndex(t => t.id === id);
+            db[idx].status = status;
+            db[idx].evidence = evidence;
+            localStorage.setItem('kof_taskhub_arcade_final', JSON.stringify(db));
+            render();
+        }
+
+        function closeModal() { 
+            document.getElementById('sub-modal').style.display = 'none';
+            document.getElementById('sub-url').value = '';
+            document.getElementById('sub-input').value = '';
+        }
+
+        function render() {
+            const active = db.filter(t => t.status === 'ACTIVE');
+            const done = db.filter(t => t.status === 'DONE');
+
+            document.getElementById('st-active').innerText = active.length;
+            document.getElementById('st-done').innerText = done.length;
+
+            const tList = document.getElementById('task-list');
+            tList.innerHTML = '';
+            active.forEach(t => {
+                tList.innerHTML += `
+                    <div class="kof-card p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 hover:bg-zinc-900/50 transition-all">
+                        <div class="flex-1">
+                            <h3 class="text-4xl font-black italic uppercase text-white tracking-tighter">${t.title}</h3>
+                            <p class="text-zinc-500 text-lg italic mt-2 leading-tight">${t.desc}</p>
+                            <div class="flex flex-wrap gap-5 text-[11px] font-black uppercase text-zinc-600 mt-5 tracking-widest">
+                                <span class="bg-black border border-zinc-800 px-2 py-1">DEPLOY: ${t.start}</span>
+                                <span class="bg-red-950/30 text-red-500 border border-red-900/30 px-2 py-1">DEADLINE: ${t.deadline}</span>
+                                <span class="text-zinc-400">ASSIGNED BY: ${t.author}</span>
+                            </div>
+                        </div>
+                        <button onclick="processTask(${t.id})" class="${user.role === 'ADMIN' ? 'btn-gold' : 'btn-kof'} px-14 py-3 italic text-2xl flex-shrink-0">
+                            ${user.role === 'ADMIN' ? 'VERIFY' : 'SUBMIT'}
+                        </button>
+                    </div>
+                `;
+            });
+
+            const hList = document.getElementById('history-list');
+            hList.innerHTML = '';
+            done.forEach(t => {
+                const evidenceLink = t.evidence.url.startsWith('http') 
+                    ? `<a href="${t.evidence.url}" target="_blank" class="text-blue-500 underline text-xs font-black italic block mt-2 uppercase tracking-widest">VIEW EVIDENCE DATA ↗</a>`
+                    : `<span class="text-yellow-600 text-[10px] font-bold italic mt-2 block">ADMIN DIRECT CLEARANCE</span>`;
+                
+                hList.innerHTML += `
+                    <div class="kof-card p-6 opacity-60 border-l-4 border-l-zinc-700">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-2xl font-black italic uppercase text-zinc-500 line-through tracking-tighter">${t.title}</h3>
+                            <span class="text-red-600 font-['Press_Start_2P'] text-[9px]">CLEARED</span>
+                        </div>
+                        <div class="mt-3 bg-black/50 p-4 border border-zinc-800/50">
+                            <p class="text-sm italic font-bold text-zinc-400">"${t.evidence.content}"</p>
+                            ${evidenceLink}
+                        </div>
+                        <div class="mt-4 flex justify-between text-[10px] font-black text-zinc-800 uppercase tracking-[2px]">
+                            <span>AGENT: ${t.evidence.by}</span>
+                            <span>TIME: ${t.evidence.time}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const teamList = document.getElementById('team-list');
+            teamList.innerHTML = '';
+            Object.keys(ROSTER).forEach(uid => {
+                teamList.innerHTML += `
+                    <div class="flex p-5 items-center hover:bg-red-900/10 transition-colors">
+                        <div class="w-1/3 font-black text-red-600 italic text-2xl uppercase tracking-tighter">${uid}</div>
+                        <div class="w-1/3 font-black text-white italic text-2xl uppercase tracking-tighter">${ROSTER[uid].name}</div>
+                        <div class="w-1/3 text-right">
+                             <span class="text-[10px] font-black px-3 py-1 border ${ROSTER[uid].role === 'ADMIN' ? 'border-yellow-500 text-yellow-500' : 'border-red-600 text-red-600'} uppercase">${ROSTER[uid].role}</span>
+                        </div>
+                    </div>
+                `;
+            });
         }
     </script>
 </body>
